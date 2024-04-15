@@ -7,6 +7,29 @@ from .forms import CreateNewList
 
 def index(response,id):
     list = ToDoList.objects.get(id=id)
+
+    if response.method == "POST":
+       print(response.POST)
+       if response.POST.get("save"): #save é o value que colocamos no botão de salvar. Aqui é para checar a origem da response do formulario
+        #response.POST é um dicionário com todas as mudanças feitas no formulário. Se algo for modificado, seu value aparece. Logo, podemos saber o que mudou
+        #ao checar quais valores aparareceram
+
+          #Esse loop é para checar cada checkbox. Cada item. Verificará pela id se foi marcado
+          for item in list.item_set.all():
+              if response.POST.get("c"+str(item.id)) == "clicked":
+                item.complete = True
+              else:
+                item.complete = False
+              item.save()
+
+       elif response.POST.get("newItem"):
+          txt = response.POST.get("new")
+
+          if len(txt)>2: #Aqui irá validar o input e adicionar na lista
+             list.item_set.create(text=txt, complete = False)
+          else:
+             print("Invalid input")   
+
     #O dicionário serve para passar as variáveis necessárias
     return render(response,"main/list.html",{"list":list})
 
